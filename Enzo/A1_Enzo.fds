@@ -1,0 +1,139 @@
+&HEAD CHID='A1_Enzo', TITLE='Formative Assignment 1 – Slow/Medium t2 Fire' /
+
+! ===================================================================
+! MESH
+! 2 cells per meter (0.5 m resolution)
+! ===================================================================
+
+&MESH IJK=42,38,22,
+      XB=0.0,21.0, 0.0,19.0, 0.0,11.0 /
+
+! ===================================================================
+! SIMULATION TIME
+! ===================================================================
+
+&TIME T_END=100.0 /
+
+! ===================================================================
+! REACTION
+! Propane fire with realistic soot yield
+! ===================================================================
+
+&REAC ID='PROPANE',
+      FUEL='PROPANE',
+      SOOT_YIELD=0.02 /
+
+! ===================================================================
+! FIRE GROWTH (Slow–Medium t²)
+! Peak HRR reached at ~90 s
+! ===================================================================
+
+&RAMP ID='FIRE_RAMP', T=0.0,  F=0.0 /
+&RAMP ID='FIRE_RAMP', T=90.0, F=1.0 /
+
+! ===================================================================
+! SURFACES
+! ===================================================================
+
+! Prescribed HRR fire
+&SURF ID='FIRE',
+      HRRPUA=1200.0,
+      RAMP_Q='FIRE_RAMP',
+      COLOR='RED' /
+
+! Background leakage surface (represents cracks, doors, etc.)
+&SURF ID='LEAK',
+      VEL=-0.05 /
+
+! ===================================================================
+! GEOMETRY: WALLS, FLOORS, CEILINGS
+! Thickness = 0.5 m (one cell)
+! ===================================================================
+
+! External enclosure
+&OBST XB=0.0,18.5, 17.0,17.5, 0.0,8.0 /
+&OBST XB=0.0,18.5, 0.0,0.5,  0.0,8.0 /
+&OBST XB=0.0,0.5,  0.0,17.0, 0.0,8.0 /
+&OBST XB=18.0,18.5,0.0,17.0, 0.0,8.0 /
+&OBST XB=0.0,18.5, 0.0,17.5, 0.0,0.5 /
+
+! Intermediate floors / ceilings
+&OBST XB=0.0,11.5, 4.0,17.5, 4.0,4.5 /
+&OBST XB=9.0,18.5, 0.0,9.0,  4.0,4.5 /
+&OBST XB=0.0,18.5, 0.0,17.5, 8.0,8.5 /
+
+! Internal partitions (unchanged)
+&OBST XB=0.0,11.5, 12.5,13.0, 0.0,8.0 /
+&OBST XB=11.0,11.5,12.5,17.0, 0.0,8.0 /
+&OBST XB=0.0,6.0,  9.0,9.5,  4.5,8.0 /
+&OBST XB=6.0,6.5,  9.0,12.5, 4.5,8.0 /
+
+&OBST XB=0.0,6.5,  7.0,7.5,  0.0,8.0 /
+&OBST XB=8.0,9.5,  7.0,7.5,  0.0,8.0 /
+&OBST XB=4.0,9.5,  4.0,4.5,  0.0,8.0 /
+&OBST XB=9.0,9.5,  0.0,7.5,  0.0,8.0 /
+&OBST XB=4.0,4.5,  0.0,4.5,  0.0,8.0 /
+
+&OBST XB=14.0,18.5,7.0,7.5,  0.0,8.0 /
+&OBST XB=14.0,14.5,0.0,7.5,  0.0,8.0 /
+
+! ===================================================================
+! FIRE LOCATION (Thin burner vent)
+! ===================================================================
+
+&VENT XB=14.2,18.0, 8.0,8.5, 0.5,0.5,
+      SURF_ID='FIRE',
+      IOR=3 /
+
+! ===================================================================
+! VENTILATION / LEAKAGE
+! ===================================================================
+
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT MB='XMIN', SURF_ID='LEAK' /
+&VENT MB='XMAX', SURF_ID='LEAK' /
+&VENT MB='YMIN', SURF_ID='LEAK' /
+&VENT MB='YMAX', SURF_ID='LEAK' /
+
+! ===================================================================
+! OUTPUT
+! ===================================================================
+
+! Temperature slice
+&SLCF PBZ=2.0, QUANTITY='TEMPERATURE' /
+
+! Velocity slice
+&SLCF PBX=14.0, QUANTITY='VELOCITY' /
+
+! Occupant-level temperature
+&DEVC ID='T_OCCUPANT',
+      XYZ=14.0,13.0,1.9,
+      QUANTITY='TEMPERATURE' /
+
+! ===================================================================
+! SMOKE ALARMS – VISIBILITY OUTPUT
+! (Plots visibility vs time)
+! ===================================================================
+
+&DEVC ID='VIS_ALARM_1',
+      XYZ=2.5,6.0,2.0,
+      QUANTITY='VISIBILITY',
+      SPEC_ID='SOOT' /
+
+&DEVC ID='VIS_ALARM_2',
+      XYZ=7.0,5.5,2.0,
+      QUANTITY='VISIBILITY',
+      SPEC_ID='SOOT' /
+
+&DEVC ID='VIS_ALARM_3',
+      XYZ=2.5,6.0,6.5,
+      QUANTITY='VISIBILITY',
+      SPEC_ID='SOOT' /
+
+&DEVC ID='VIS_ALARM_4',
+      XYZ=7.0,5.5,6.5,
+      QUANTITY='VISIBILITY',
+      SPEC_ID='SOOT' /
+
+! ===================================================================
+&TAIL /
