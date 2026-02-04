@@ -1,0 +1,91 @@
+&HEAD CHID='Vent',
+      TITLE='Atrium Spill Plume - Tunable Localized Leakage' /
+
+! ===================================================================
+! MESH
+! ===================================================================
+&MESH IJK=42,42,22,
+      XB=0.0,21.0, -2.0,19.0, 0.0,11.0 /
+
+&TIME T_END=300.0 /
+
+&MISC RADIATION=.TRUE., TMPA=20.0 /
+
+&REAC ID='PROPANE', FUEL='PROPANE', SOOT_YIELD=0.02 /
+
+! ===================================================================
+! SURFACES
+! ===================================================================
+&SURF ID='FIRE', HRRPUA=1200.0, RAMP_Q='MEDIUM_T2', COLOR='RED' /
+&SURF ID='WALL_SURF', COLOR='GRAY' /
+
+&RAMP ID='MEDIUM_T2', T=0.0,   F=0.0 /
+&RAMP ID='MEDIUM_T2', T=150.0, F=1.0 /
+
+! ===================================================================
+! GEOMETRY (OBSTACLES)
+! ===================================================================
+&OBST XB=0.0,18.5, 17.0,17.5, 0.0,8.0 /
+&OBST XB=0.0,18.5, 0.0,0.5,  0.0,8.0 /
+&OBST XB=0.0,0.5,  0.0,17.0, 0.0,8.0 /
+&OBST XB=18.0,18.5,0.0,17.0, 0.0,8.0 /
+&OBST XB=0.0,18.5, 0.0,17.5, 0.0,0.5 /
+
+&OBST XB=0.0,11.5, 4.0,17.5, 4.0,4.5 /
+&OBST XB=9.0,18.5, 0.0,9.0,  4.0,4.5 /
+&OBST XB=0.0,18.5, 0.0,17.5, 8.0,8.5 /
+
+&OBST XB=0.0,6.0,  9.0,12.5, 4.5,8.0 /
+&OBST XB=0.0,11.5, 12.5,17.5, 0.0,8.0 /
+&OBST XB=14.0,18.5, 0.0,7.5,  0.0,8.0 /
+&OBST XB=4.0,9.5,  0.0,4.5,  0.0,8.0 /
+
+&OBST XB=0.0,6.5,  7.0,7.5,  0.0,8.0 /
+&OBST XB=8.0,9.5,  7.0,7.5,  0.0,8.0 /
+&OBST XB=9.0,9.5,  4.5,7.5,  0.0,8.0 /
+
+! ===================================================================
+! LOCALIZED LEAKAGE (TUNABLE)
+! ===================================================================
+
+! These VENTS define WHERE the leakage happens.
+&VENT ID='LEAK_IN',  XB=9.0,14.0, 0.5,0.5, 4.5,8.0, SURF_ID='WALL_SURF' /
+&VENT ID='LEAK_OUT', XB=9.0,14.0, 0.0,0.0, 4.5,8.0, SURF_ID='WALL_SURF' /
+
+! TUNING SECTION:
+! 1. To change TOTAL CAPACITY: Change AREA (e.g., 0.1 for more, 0.01 for less).
+! 2. To change POROSITY/RESISTANCE: Change LOSS (1.0 = open gap, 10.0 = restrictive).
+! TUNING REFERENCE:
+! Closed Door/Sealed Corridor: AREA=0.15, LOSS=1.0
+! Partially Open Corridor:     AREA=1.5,  LOSS=1.5
+! Fully Open Corridor Path:    AREA=15.0,  LOSS=1.0 
+&HVAC ID='POROUS_LEAK', 
+      TYPE_ID='LEAK', 
+      VENT_ID='LEAK_IN', 
+      VENT2_ID='LEAK_OUT', 
+      AREA=15.0, 
+      LOSS=1.0,
+      LEAK_ENTHALPY=.TRUE. /
+
+! ===================================================================
+! FIRE & BOUNDARIES
+! ===================================================================
+&VENT XB=14.5,18.0, 8.0,8.5, 0.5,0.5, SURF_ID='FIRE', IOR=3 /
+
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+
+! ===================================================================
+! OUTPUTS
+! ===================================================================
+&SLCF PBZ=6.5, QUANTITY='TEMPERATURE' /
+&SLCF PBZ=6.5, QUANTITY='VISIBILITY', SPEC_ID='SOOT' /
+&SLCF PBX=11.5, QUANTITY='VELOCITY' /
+
+&DEVC ID='DOOR_TEMP', XYZ=7.5,7.0,6.5, QUANTITY='TEMPERATURE' /
+&DEVC ID='DOOR_VIS',  XYZ=7.5,7.0,6.5, QUANTITY='VISIBILITY', SPEC_ID='SOOT' /
+
+&TAIL /
